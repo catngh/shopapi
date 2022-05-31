@@ -2,7 +2,8 @@
 A simple backend system for a shopping app
 
 ## Model
-![image](https://user-images.githubusercontent.com/84314071/171107377-626444d6-bd1f-489d-b99c-442e1f250ab0.png)
+![image](https://user-images.githubusercontent.com/84314071/171119893-c8294090-fbf4-4b45-9556-424f6332f809.png)
+
 
 
 ## API
