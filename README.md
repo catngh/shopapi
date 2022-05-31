@@ -2,9 +2,9 @@
 A simple backend system for a shopping app
 
 ## Table of content
-- [Model](https://github.com/BerIincat/shopapi/edit/master/README.md#model)
-- [API](https://github.com/BerIincat/shopapi/edit/master/README.md#api)
-- [Diagrams](https://github.com/BerIincat/shopapi/edit/master/README.md#diagrams)
+- [Model](https://github.com/BerIincat/shopapi/README.md#model)
+- [API](https://github.com/BerIincat/shopapi/README.md#api)
+- [Diagrams](https://github.com/BerIincat/shopapi/README.md#diagrams)
 
 ## Model
 ![image](https://user-images.githubusercontent.com/84314071/171119893-c8294090-fbf4-4b45-9556-424f6332f809.png)
