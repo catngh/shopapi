@@ -46,7 +46,7 @@ Response body
 ```
 #### Product
 Get all products: ```GET /products```<br/>
-Get cart/inventory of a user ```GET /products/{userId}```
+Get cart/inventory of a user: ```GET /products/{userId}```
 
 ```
 Response body
@@ -68,11 +68,60 @@ Response body
 ```
 
 #### Cart
-("/cart/{userId}",cart.GetCart).Methods("GET")<br/>
-("/cart/{userId}",cart.AddItem).Methods("POST")<br/>
-("/cart/{userId}",cart.DelItem).Methods("DELETE")<br/>
+Get cart info of a user: ```GET /cart/{userId}```
+```
+Response body
+{
+  cartId: "1",
+  userId: "2",
+  items:
+  [
+    {
+      productId: "1",
+      name: "abc",
+      price: 12.5
+    },
+    {
+      productId: "2",
+      name: "bca",
+      price: 10
+    },
+    ...
+  ]
+}
+```
+
+Add item to cart: ```POST /cart/{userId}```
+```
+Request body
+{
+  productId: "1",
+  name: "abc",
+  price: 12.5
+}
+```
+
+Delete item in cart: ```DELETE /cart/{userId}```
+```
+Request body
+{
+  productId: "2",
+  name: "aec",
+  price: 11.5
+}
+```
+
 #### Order
-("/order/{cartId}",order.NewOrder).Methods("POST")<br/>
+Create order with existing cart: ```POST /order/cartId```
+```
+Response body
+{
+  orderId: "32",
+  cartId: "1",
+  subTotal: "2000",
+  timeCreated: 2022-04-23T18:25
+}
+```
 
 ## Diagrams
 #### Login user
