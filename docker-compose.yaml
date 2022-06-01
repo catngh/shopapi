@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_DATABASE: shop
+      MYSQL_USER: admin
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - 8080:3306
+    restart: always
+volumes:
+  db:
