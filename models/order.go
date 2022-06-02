@@ -3,8 +3,8 @@ package models
 import "time"
 
 type Order struct {
-	OrderID     string    `json:"orderId"`
-	CartID      string    `json:"cartId"`
-	SubTotal    string    `json:"subTotal"`
-	TimeCreated time.Time `json:"timeCreated"`
+	OrderID     string    `db:"orderId" json:"orderId"`
+	CartID      string    `db:"cartId" json:"cartId"`
+	SubTotal    string    `db:"subTotal" json:"subTotal"`
+	TimeCreated time.Time `db:"timeCreated" json:"timeCreated"`
 }
