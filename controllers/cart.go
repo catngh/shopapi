@@ -12,6 +12,8 @@ import (
 func GetCart(c *gin.Context) {
 	userId := c.Param("userid")
 	db := database.DB
+	product := models.Product{}
+	var products []models.Product
 	var ProdIdList []string
 	//products := []models.Product{}
 	cart := [20]models.Cart{} // Need to be dynamic !!!
@@ -37,7 +39,13 @@ func GetCart(c *gin.Context) {
 		ProdIdList = append(ProdIdList, cart[i].Item)
 		i++
 	}
-	c.JSON(200, ProdIdList)
+	for _, ele := range ProdIdList {
+		q := "SELECT * FROM product WHERE productId=" + ele
+		db.Get(&product, q)
+		products = append(products, product)
+	}
+	// ProdIdList has list of id, need to use this list to out put product object
+	c.JSON(200, products)
 	return
 }
 func DelCartItem(c *gin.Context) {
@@ -52,24 +60,27 @@ func DelCartItem(c *gin.Context) {
 
 	// Check for user id
 	q := "SELECT * FROM usr WHERE userId=" + userId
-	_, err = db.Query(q)
-	if err != nil {
+	row := db.QueryRow(q)
+	if row.Scan() == sql.ErrNoRows {
 		c.JSON(400, gin.H{"error": "user not found"})
 		return
 	}
 
 	// Check for product id
 	q = "SELECT * FROM product WHERE productId=" + body.ProdId
-	_, err = db.Query(q)
-	if err != nil {
+	row = db.QueryRow(q)
+	if row.Scan() == sql.ErrNoRows {
 		c.JSON(400, gin.H{"error": "product not found"})
 		return
 	}
 
 	// Delete cart
-	q := "DELETE FROM cart WHERE userId=" + userId + "AND item=" + body.ProdId
+	q = "DELETE FROM cart WHERE userId=" + userId + " AND item='" + body.ProdId + "'"
+	fmt.Print(q)
+
 	_, err = db.Query(q)
 	if err != nil {
+		fmt.Print(err.Error())
 		c.JSON(500, gin.H{"error": "database error"})
 		return
 	}
@@ -90,8 +101,8 @@ func AddCartItem(c *gin.Context) {
 
 	// Check for user id
 	q := "SELECT * FROM usr WHERE userId=" + userId
-	_, err = db.Query(q)
-	if err != nil {
+	row := db.QueryRow(q)
+	if row.Scan() == sql.ErrNoRows {
 		c.JSON(400, gin.H{"error": "user not found"})
 		return
 	}
