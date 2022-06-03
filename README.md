@@ -95,9 +95,7 @@ Add item to cart: ```POST /cart/{userId}```
 ```
 Request body
 {
-  productId: "1",
-  name: "abc",
-  price: 12.5
+  productId: "1"
 }
 ```
 
@@ -106,8 +104,6 @@ Delete item in cart: ```DELETE /cart/{userId}```
 Request body
 {
   productId: "2",
-  name: "aec",
-  price: 11.5
 }
 ```
 
