@@ -67,7 +67,8 @@ func Register(c *gin.Context) {
 			}
 		}
 		usrid, err := res.LastInsertId()
-		c.JSON(201, gin.H{"userId": string(strconv.FormatInt(usrid, 10)), "email": newUser.Email, "role": newUser.Role})
+		newUser.UserID = string(strconv.FormatInt(usrid, 10))
+		c.JSON(201, gin.H{"userId": newUser.UserID, "email": newUser.Email, "role": newUser.Role})
 	}
 
 }
