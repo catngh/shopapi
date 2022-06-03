@@ -16,9 +16,9 @@ func Setup() *gin.Engine {
 	router.GET("/products", controllers.GetProducts)
 	router.GET("/inventory/:userid", controllers.GetUserInventory)
 	//cart
-	router.GET("/cart/{userId}", controllers.GetCart)
-	router.POST("/cart/{userId}", controllers.AddCartItem)
-	router.DELETE("/cart/{userId}", controllers.DelCartItem)
+	router.GET("/cart/:userid", controllers.GetCart)
+	router.POST("/cart/:userid", controllers.AddCartItem)
+	router.DELETE("/cart/:userid", controllers.DelCartItem)
 	//order
 	router.POST("/order", controllers.NewOrder)
 	return router

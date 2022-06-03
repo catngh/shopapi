@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/catng/Projects/shopapi/shopapi'
+sql-migrate down -env=development
+docker-compose down -v
+make: Leaving directory `/Users/catng/Projects/shopapi/shopapi'
+ 
