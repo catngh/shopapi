@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/BerIincat/shopapi/database"
 	"github.com/BerIincat/shopapi/models"
@@ -44,7 +43,7 @@ func GetCart(c *gin.Context) {
 		db.Get(&product, q)
 		products = append(products, product)
 	}
-	// ProdIdList has list of id, need to use this list to out put product object
+	// products hold list of product object
 	c.JSON(200, products)
 	return
 }
@@ -76,11 +75,9 @@ func DelCartItem(c *gin.Context) {
 
 	// Delete cart
 	q = "DELETE FROM cart WHERE userId=" + userId + " AND item='" + body.ProdId + "'"
-	fmt.Print(q)
 
 	_, err = db.Query(q)
 	if err != nil {
-		fmt.Print(err.Error())
 		c.JSON(500, gin.H{"error": "database error"})
 		return
 	}
@@ -119,7 +116,6 @@ func AddCartItem(c *gin.Context) {
 	q = "INSERT INTO cart(userId,item) VALUES (" + userId + "," + product.ProductID + ")"
 	_, err = db.Query(q)
 	if err != nil {
-		fmt.Print(err.Error())
 		c.JSON(400, gin.H{"error": "product not found"})
 		return
 	}

@@ -20,6 +20,6 @@ func Setup() *gin.Engine {
 	router.POST("/cart/:userid", controllers.AddCartItem)
 	router.DELETE("/cart/:userid", controllers.DelCartItem)
 	//order
-	router.POST("/order", controllers.NewOrder)
+	router.POST("/order/:userid", controllers.NewOrder)
 	return router
 }
