@@ -13,5 +13,9 @@ services:
     ports:
       - 3306:3306
     restart: always
+    healthcheck:
+            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            timeout: 20s
+            retries: 10
 volumes:
   db:
