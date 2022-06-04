@@ -1,84 +1,75 @@
 package controllers
 
 import (
-	"net/mail"
 	"strconv"
 
 	"github.com/BerIincat/shopapi/database"
 	"github.com/BerIincat/shopapi/models"
+	"github.com/BerIincat/shopapi/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/go-passwd/validator"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func Login(c *gin.Context) {
 	db := database.DB
-	var newUser models.User
+	var newUser, queriedUser models.User
 	err := c.BindJSON(&newUser)
 
-	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid request"})
-	} else if !emailValid(newUser.Email) {
-		c.JSON(400, gin.H{"error": "invalid email"})
-	} else if !pwdValid(newUser.Password) {
-		c.JSON(400, gin.H{"error": "password required at least 6 characters"})
-	} else {
-		q := "SELECT * FROM usr WHERE email='" + newUser.Email + "'"
-		var pwd, id, email, role string
-		row := db.QueryRow(q)
-		err := row.Scan(&id, &email, &pwd, &role)
-		// Email not found
-		if err != nil {
-			c.JSON(400, gin.H{"error": "user not found"})
-			return
-		}
-		err = bcrypt.CompareHashAndPassword([]byte(pwd), []byte(newUser.Password))
-		if err != nil {
-			// Email found but wrong pass
-			c.JSON(400, gin.H{"error": "password incorrect"})
-		} else {
-			// Correct email and pass
-			c.JSON(200, gin.H{"userId": id, "email": email, "role": role})
-		}
-
+	// Validating request frorm and user input
+	if utils.PrintErrIfAny(err, 400, gin.H{"error": "invalid request"}, c) {
+		return
 	}
+	if !utils.ValidateEmailPwd(newUser.Email, newUser.Password, c) {
+		return
+	}
+
+	// Prepare to query
+	err = db.Get(&queriedUser, "SELECT * FROM usr WHERE email=?", newUser.Email)
+
+	// Email not found
+	if utils.PrintErrIfAny(err, 400, gin.H{"error": "email not found"}, c) {
+		return
+	}
+
+	// Comparing input password and db record
+	err = bcrypt.CompareHashAndPassword([]byte(queriedUser.Password), []byte(newUser.Password))
+	if utils.PrintErrIfAny(err, 400, gin.H{"error": "password incorrect"}, c) {
+		return
+	}
+	// Correct email and pass
+	c.JSON(200, gin.H{"userId": queriedUser.UserID, "email": queriedUser.Email, "role": queriedUser.Role})
+
 }
 func Register(c *gin.Context) {
 	db := database.DB
 	var newUser models.User
 	err := c.BindJSON(&newUser)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid register form"})
-	} else if !emailValid(newUser.Email) {
-		c.JSON(400, gin.H{"error": "invalid email"})
-	} else if !pwdValid(newUser.Password) {
-		c.JSON(400, gin.H{"error": "password required at least 6 characters"})
-	} else {
-		hashed, _ := bcrypt.GenerateFromPassword([]byte(newUser.Password), 8)
-		newUser.Password = string(hashed)
-		q := "INSERT INTO usr (email,password,role) VALUES ('" + newUser.Email + "','" + newUser.Password + "','" + newUser.Role + "')"
-		res, err := db.Exec(q)
-		// Duplicate entry
-		if err != nil {
-			if err.Error()[6:10] == "1062" {
-				c.JSON(400, gin.H{"error": "email existed"})
-			} else {
-				c.JSON(500, gin.H{"error": "database error"})
-			}
-		}
-		usrid, err := res.LastInsertId()
-		newUser.UserID = string(strconv.FormatInt(usrid, 10))
-		c.JSON(201, gin.H{"userId": newUser.UserID, "email": newUser.Email, "role": newUser.Role})
+
+	// Validating user input
+	if utils.PrintErrIfAny(err, 400, gin.H{"error": "invalid request form"}, c) {
+		return
+	}
+	if !utils.ValidateEmailPwd(newUser.Email, newUser.Password, c) {
+		return
 	}
 
-}
+	// Preparing query
+	hashed, _ := bcrypt.GenerateFromPassword([]byte(newUser.Password), 8)
+	newUser.Password = string(hashed)
+	res, err := db.Exec("INSERT INTO usr (email,password,role) VALUES ('?','?','?')", newUser.Email, newUser.Password, newUser.Role)
 
-func emailValid(email string) bool {
-	_, err := mail.ParseAddress(email)
-	return err == nil
-}
-func pwdValid(pwd string) bool {
-	passwordValidator := validator.New(validator.MinLength(6, nil))
-	err := passwordValidator.Validate(pwd)
-	return err == nil
+	// Duplicated entry
+	if err != nil {
+		if err.Error()[6:10] == "1062" {
+			c.JSON(400, gin.H{"error": "email existed"})
+		} else {
+			c.JSON(500, gin.H{"error": "database error"})
+		}
+	}
+
+	// Return registered info
+	usrid, err := res.LastInsertId()
+	newUser.UserID = string(strconv.FormatInt(usrid, 10))
+	c.JSON(201, gin.H{"userId": newUser.UserID, "email": newUser.Email, "role": newUser.Role})
+
 }
