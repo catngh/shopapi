@@ -6,8 +6,11 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
+ 
+make: *** No rule to make target `all'.  Stop.
 
-# Make data base, printed on Sat Jun  4 13:01:20 2022
+
+# Make data base, printed on Sat Jun  4 19:33:19 2022
 
 # Variables
 
@@ -42,7 +45,7 @@ __CFBundleIdentifier = com.microsoft.VSCode
 # environment
 INFOPATH = /opt/homebrew/share/info:
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/r0/9b9qvntn15lb_83zh0w9_p040000gn/T/vscode-ipc-03c786b8-d2b5-4e1b-88c7-3f798a58f7fc.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/r0/9b9qvntn15lb_83zh0w9_p040000gn/T/vscode-ipc-396e673e-f3cb-4d5a-88c1-0d63ef2d5b9f.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -109,6 +112,9 @@ USER = catng
 %D = $(patsubst %/,%,$(dir $%))
 # default
 MAKE_COMMAND := /Library/Developer/CommandLineTools/usr/bin/make
+# makefile (from `Makefile', line 2)
+ 
+DB_CONTAINER = shopapi-db-1
 # default
 .VARIABLES := 
 # environment
@@ -160,7 +166,7 @@ VSCODE_PID = 428
 # makefile (from `Makefile', line 1)
 env = development
 # variable set hash-table stats:
-# Load=74/1024=7%, Rehash=0, Collisions=2/99=2%
+# Load=75/1024=7%, Rehash=0, Collisions=2/101=2%
 
 # Pattern-specific Variable Values
 
@@ -201,7 +207,7 @@ all:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-03 15:02:59
+#  Last modified 2022-06-04 15:36:24
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -212,11 +218,12 @@ migrate:
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 16):
+#  commands to execute (from `Makefile', line 22):
 	sql-migrate up --env=$(env)
 	
 
 # Not a target:
+ 
 .DEFAULT:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
@@ -227,7 +234,7 @@ run:
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 12):
+#  commands to execute (from `Makefile', line 18):
 	go run index.go
 	
 
@@ -235,8 +242,11 @@ init:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 7):
+#  commands to execute (from `Makefile', line 10):
 	docker-compose up -d
+	@while ! docker exec $(DB_CONTAINER) mysql --user=root --password=123456 -e "SELECT 1" >/dev/null 2>&1; do \
+	sleep 1; \
+	done
 	sql-migrate up -env=$(env)
 	
 
@@ -244,7 +254,7 @@ teardown:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 3):
+#  commands to execute (from `Makefile', line 6):
 	sql-migrate down -env=$(env)
 	docker-compose down -v
 	
@@ -262,8 +272,6 @@ teardown:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sat Jun  4 13:01:20 2022
+# Finished Make data base on Sat Jun  4 19:33:19 2022
 
  
-make: *** No rule to make target `all'.  Stop.
-
