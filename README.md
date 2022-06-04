@@ -108,7 +108,7 @@ Request body
 ```
 
 #### Order
-Create order with existing cart: ```POST /order/cartId```
+Create order with existing cart: ```POST /order/userid```
 ```
 Response body
 {
