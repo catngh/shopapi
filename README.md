@@ -1,5 +1,8 @@
 # shopapi
 A simple backend system for a shopping app
+## How to run
+`make init` to setup container and migrate db
+`make run` to start server
 
 ## Table of content
 - [Model](https://github.com/BerIincat/shopapi#model)
