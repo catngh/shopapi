@@ -4,9 +4,13 @@ import (
 	"github.com/BerIincat/shopapi/models"
 )
 
-var User userControl
+//var User userControl
 
 type userControl struct {
+}
+
+func User() *userControl {
+	return &userControl{}
 }
 
 func (u userControl) GetByEmail(email string) (models.User, error) {
@@ -21,8 +25,9 @@ func (u userControl) GetById(uid string) (models.User, error) {
 }
 
 func (u userControl) Create(usr models.User) (models.User, error) {
-	result := DB.Select("Email", "Password", "Role").Create(&usr)
-	return usr, result.Error
+	newUsr := usr
+	result := DB.Select("Email", "Password", "Role").Create(&newUsr)
+	return newUsr, result.Error
 }
 
 func (u userControl) IdExist(uid string) bool {

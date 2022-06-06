@@ -10,7 +10,7 @@ import (
 )
 
 func GetProducts(c *gin.Context) {
-	products, err := database.Product.GetAll()
+	products, err := database.Product().GetAll()
 	if err != nil {
 		c.JSON(500, gin.H{"error": "database error"})
 		return
@@ -23,7 +23,7 @@ func GetUserInventory(c *gin.Context) {
 	user := models.User{}
 
 	// Get user from db
-	user, err := database.User.GetById(id)
+	user, err := database.User().GetById(id)
 
 	// Check user id and role
 	if err == sql.ErrNoRows {
@@ -40,7 +40,7 @@ func GetUserInventory(c *gin.Context) {
 
 	// Get user inventory and bind to products
 
-	products, err = database.Product.GetAllByUserID(id)
+	products, err = database.Product().GetAllByUserID(id)
 	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
 		return
 	}

@@ -4,9 +4,13 @@ import (
 	"github.com/BerIincat/shopapi/models"
 )
 
-var Cart cartControl
+//var Cart cartControl
 
 type cartControl struct {
+}
+
+func Cart() *cartControl {
+	return &cartControl{}
 }
 
 func (u cartControl) GetAllByUserID(uid string) ([]models.Cart, error) {

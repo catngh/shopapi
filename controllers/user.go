@@ -19,8 +19,8 @@ func Login(c *gin.Context) {
 	if !utils.ValidateEmailPwd(newUser.Email, newUser.Password, c) {
 		return
 	}
-	queriedUser, err = database.User.GetByEmail(newUser.Email)
-
+	//queriedUser, err = database.User.GetByEmail(newUser.Email)
+	queriedUser, err = database.User().GetByEmail(newUser.Email)
 	// Email not found
 	if utils.PrintErrIfAny(err, 400, gin.H{"error": "email not found"}, c) {
 		return
@@ -52,7 +52,7 @@ func Register(c *gin.Context) {
 	newUser.Password = string(hashed)
 
 	// Populated newUser struct
-	newUser, err = database.User.Create(newUser)
+	newUser, err = database.User().Create(newUser)
 
 	// Duplicated entry
 	if err != nil {

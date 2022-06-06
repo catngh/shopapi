@@ -18,26 +18,26 @@ func NewOrder(c *gin.Context) {
 	cart := []models.Cart{}
 
 	// Check for user id
-	if !database.User.IdExist(userId) {
+	if !database.User().IdExist(userId) {
 		c.JSON(400, gin.H{"error": "user not found"})
 		return
 	}
 
 	// Get items in cart
-	cart, err := database.Cart.GetAllByUserID(userId)
+	cart, err := database.Cart().GetAllByUserID(userId)
 	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 
 	for _, ele := range cart {
 		// Get product by id -> append to product list -> sum into total price
-		product, _ = database.Product.GetByID(ele.Item)
+		product, _ = database.Product().GetByID(ele.Item)
 		products = append(products, product)
 		cartId = ele.CartID
 	}
 	total = getTotalPrice(products)
 
-	err = database.Order.Create(cartId, total)
+	err = database.Order().Create(cartId, total)
 	if utils.PrintErrIfAny(err, 400, gin.H{"error": "order error"}, c) {
 		return
 	}
