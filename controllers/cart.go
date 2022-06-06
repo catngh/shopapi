@@ -12,8 +12,7 @@ func GetCart(c *gin.Context) {
 	db := database.DB
 	product := models.Product{}
 	var products []models.Product
-	var ProdIdList []string
-	cart := [20]models.Cart{} // Need to be dynamic !!!
+	cart := []models.Cart{}
 
 	// Check for user id
 	if !utils.UserIdExist(userId) {
@@ -22,22 +21,15 @@ func GetCart(c *gin.Context) {
 	}
 
 	// Get items in cart
-	rows, err := db.Queryx("SELECT * FROM cart WHERE userId=?", userId)
-	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
+	result := db.Where("userId=?", userId).Find(&cart)
+	//rows, err := db.Queryx("SELECT * FROM cart WHERE userId=?", userId)
+
+	if utils.PrintErrIfAny(result.Error, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 
-	// Parse result into struct list
-	i := 0
-	for rows.Next() {
-		_ = rows.StructScan(&cart[i])
-		ProdIdList = append(ProdIdList, cart[i].Item)
-		i++
-	}
-
-	// Use item ids in cart to query for full product info => Inefficient
-	for _, ele := range ProdIdList {
-		db.Get(&product, "SELECT * FROM product WHERE productId=?", ele)
+	for _, ele := range cart {
+		db.Where("productId=?", ele.Item).Find(&product)
 		products = append(products, product)
 	}
 
@@ -49,6 +41,7 @@ func DelCartItem(c *gin.Context) {
 	db := database.DB
 	userId := c.Param("userid")
 	body := ReqBody{} //To parse req body
+	cart := models.Cart{}
 	err := c.BindJSON(&body)
 
 	if utils.PrintErrIfAny(err, 400, gin.H{"error": "invalid request form"}, c) {
@@ -60,8 +53,9 @@ func DelCartItem(c *gin.Context) {
 	}
 
 	// Prepare query
-	_, err = db.Query("DELETE FROM cart WHERE userId=? AND item=?", userId, body.ProdId)
-	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
+	result := db.Where("userId=? AND item=?", userId, body.ProdId).Delete(&cart)
+	//_, err = db.Query("DELETE FROM cart WHERE userId=? AND item=?", userId, body.ProdId)
+	if utils.PrintErrIfAny(result.Error, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 
@@ -72,7 +66,6 @@ func AddCartItem(c *gin.Context) {
 	db := database.DB
 	userId := c.Param("userid")
 	body := ReqBody{} //To parse req body
-	product := models.Product{}
 
 	err := c.BindJSON(&body)
 	if utils.PrintErrIfAny(err, 400, gin.H{"error": "invalid request form"}, c) {
@@ -84,8 +77,11 @@ func AddCartItem(c *gin.Context) {
 	}
 
 	// Insert new item
-	_, err = db.Query("INSERT INTO cart(userId,item) VALUES (?,?)", userId, product.ProductID)
-	if utils.PrintErrIfAny(err, 400, gin.H{"error": "product not found"}, c) {
+	cart := models.Cart{UserID: userId, Item: body.ProdId}
+	result := db.Select("UserID", "Item").Create(&cart)
+	//_, err = db.Query("INSERT INTO cart(userId,item) VALUES (?,?)", userId, .ProductID)
+
+	if utils.PrintErrIfAny(result.Error, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 

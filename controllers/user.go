@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/BerIincat/shopapi/database"
 	"github.com/BerIincat/shopapi/models"
 	"github.com/BerIincat/shopapi/utils"
@@ -22,12 +20,11 @@ func Login(c *gin.Context) {
 	if !utils.ValidateEmailPwd(newUser.Email, newUser.Password, c) {
 		return
 	}
-
-	// Prepare to query
-	err = db.Get(&queriedUser, "SELECT * FROM usr WHERE email=?", newUser.Email)
+	result := db.Where("email=?", newUser.Email).First(&queriedUser)
+	//err = db.Get(&queriedUser, "SELECT * FROM usr WHERE email=?", newUser.Email)
 
 	// Email not found
-	if utils.PrintErrIfAny(err, 400, gin.H{"error": "email not found"}, c) {
+	if utils.PrintErrIfAny(result.Error, 400, gin.H{"error": "email not found"}, c) {
 		return
 	}
 
@@ -56,20 +53,21 @@ func Register(c *gin.Context) {
 	// Preparing query
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(newUser.Password), 8)
 	newUser.Password = string(hashed)
-	res, err := db.Exec("INSERT INTO usr (email,password,role) VALUES ('?','?','?')", newUser.Email, newUser.Password, newUser.Role)
 
+	// Populated newUser struct
+	result := db.Select("Email", "Password", "Role").Create(&newUser)
+	//res, err := db.Exec("INSERT INTO usr (email,password,role) VALUES ('?','?','?')", newUser.Email, newUser.Password, newUser.Role)
 	// Duplicated entry
-	if err != nil {
-		if err.Error()[6:10] == "1062" {
+	if result.Error != nil {
+		if result.Error.Error()[6:10] == "1062" {
 			c.JSON(400, gin.H{"error": "email existed"})
 		} else {
 			c.JSON(500, gin.H{"error": "database error"})
 		}
+		return
 	}
 
 	// Return registered info
-	usrid, err := res.LastInsertId()
-	newUser.UserID = string(strconv.FormatInt(usrid, 10))
 	c.JSON(201, gin.H{"userId": newUser.UserID, "email": newUser.Email, "role": newUser.Role})
 
 }

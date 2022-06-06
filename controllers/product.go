@@ -14,8 +14,9 @@ func GetProducts(c *gin.Context) {
 	products := []models.Product{}
 
 	// Query and bind to products
-	err := db.Select(&products, "SELECT * FROM product")
-	if err != nil {
+	result := db.Find(&products)
+	//err := db.Select(&products, "SELECT * FROM product")
+	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "database error"})
 		return
 	}
@@ -28,14 +29,16 @@ func GetUserInventory(c *gin.Context) {
 	user := models.User{}
 
 	// Query and bind to user
-	err := db.Get(&user, "SELECT * FROM usr WHERE userId=?", id)
+
+	result := db.Where("userId=?", id).First(&user)
+	//err := db.Get(&user, "SELECT * FROM usr WHERE userId=?", id)
 
 	// Check user id and role
-	if err == sql.ErrNoRows {
+	if result.Error == sql.ErrNoRows {
 		c.JSON(400, gin.H{"error": "user not found"})
 		return
 	}
-	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
+	if utils.PrintErrIfAny(result.Error, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 	if user.Role != "vendor" {
@@ -44,8 +47,10 @@ func GetUserInventory(c *gin.Context) {
 	}
 
 	// Get user inventory and bind to products
-	err = db.Select(&products, "SELECT * FROM product WHERE vendorId='"+id+"'")
-	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
+
+	result = db.Where("vendorId=?", id).Find(&products)
+	//result = db.Select(&products, "SELECT * FROM product WHERE vendorId='"+id+"'")
+	if utils.PrintErrIfAny(result.Error, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 	c.IndentedJSON(200, products)

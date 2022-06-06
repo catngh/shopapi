@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/BerIincat/shopapi/database"
+	"github.com/BerIincat/shopapi/models"
 	"github.com/gin-gonic/gin"
 	"github.com/go-passwd/validator"
 	"github.com/joho/godotenv"
@@ -23,18 +24,22 @@ func GetEnv(key string) string {
 }
 func UserIdExist(uid string) bool {
 	db := database.DB
-	q := "SELECT * FROM usr WHERE userId=" + uid
-	row := db.QueryRow(q)
-	if row.Scan() == sql.ErrNoRows {
+	user := models.User{}
+	// q := "SELECT * FROM usr WHERE userId=" + uid
+	// row := db.QueryRow(q)
+	res := db.Where("userId=?", uid).First(&user)
+	if res.Error == sql.ErrNoRows || res.Error != nil {
 		return false
 	}
 	return true
 }
 func ProductIdExist(pid string) bool {
 	db := database.DB
-	q := "SELECT * FROM product WHERE productId=" + pid
-	row := db.QueryRow(q)
-	if row.Scan() == sql.ErrNoRows {
+	product := models.Product{}
+	// q := "SELECT * FROM product WHERE productId=" + pid
+	// row := db.QueryRow(q)
+	res := db.Where("productId=?", pid).First(&product)
+	if res.Error == sql.ErrNoRows || res.Error != nil {
 		return false
 	}
 	return true
