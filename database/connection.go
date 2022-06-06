@@ -11,6 +11,7 @@ import (
 )
 
 var DB *gorm.DB
+var DC *DbControllers
 
 func Connect() {
 	db_name := getEnv("DB_NAME")
@@ -24,4 +25,18 @@ func Connect() {
 func getEnv(key string) string {
 	godotenv.Load(".env")
 	return os.Getenv(key)
+}
+func (d *DbControllers) Init(ins *DbControllers) {
+	d.UserContr = userControl{}
+	d.ProductContr = productControl{}
+	d.CartContr = cartControl{}
+	d.OrderContr = orderControl{}
+	DC = ins
+}
+
+type DbControllers struct {
+	UserContr    userControl
+	ProductContr productControl
+	CartContr    cartControl
+	OrderContr   orderControl
 }

@@ -10,7 +10,7 @@ type userControl struct {
 }
 
 func User() *userControl {
-	return &userControl{}
+	return &DC.UserContr
 }
 
 func (u userControl) GetByEmail(email string) (models.User, error) {
