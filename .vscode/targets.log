@@ -10,7 +10,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target `all'.  Stop.
 
 
-# Make data base, printed on Sat Jun  4 19:33:19 2022
+# Make data base, printed on Mon Jun  6 09:37:25 2022
 
 # Variables
 
@@ -45,7 +45,7 @@ __CFBundleIdentifier = com.microsoft.VSCode
 # environment
 INFOPATH = /opt/homebrew/share/info:
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/r0/9b9qvntn15lb_83zh0w9_p040000gn/T/vscode-ipc-396e673e-f3cb-4d5a-88c1-0d63ef2d5b9f.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/r0/9b9qvntn15lb_83zh0w9_p040000gn/T/vscode-ipc-b63ad8eb-1c4e-48f3-bef3-c2ff5ad65ec4.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -55,7 +55,7 @@ PATH = /Users/catng/go/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/
 # environment
 GOPATH = /Users/catng/go
 # environment
-LaunchInstanceID = 2CF69F93-971B-45BE-96E9-A13189B5650D
+LaunchInstanceID = 63B742C2-9DCF-437C-B906-502918568462
 # environment
 VSCODE_LOG_STACK = false
 # environment
@@ -63,7 +63,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.riVNPLiCax/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.mPhKqxbeco/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -113,7 +113,6 @@ USER = catng
 # default
 MAKE_COMMAND := /Library/Developer/CommandLineTools/usr/bin/make
 # makefile (from `Makefile', line 2)
- 
 DB_CONTAINER = shopapi-db-1
 # default
 .VARIABLES := 
@@ -162,7 +161,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 428
+VSCODE_PID = 416
 # makefile (from `Makefile', line 1)
 env = development
 # variable set hash-table stats:
@@ -174,7 +173,7 @@ env = development
 
 # Directories
 
-# . (device 16777231, inode 481998): 19 files, no impossibilities.
+# . (device 16777234, inode 481998): 19 files, no impossibilities.
 
 # 19 files, no impossibilities in 1 directories.
 
@@ -223,7 +222,6 @@ migrate:
 	
 
 # Not a target:
- 
 .DEFAULT:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
@@ -265,6 +263,7 @@ teardown:
 
 # No `vpath' search paths.
 
+ 
 # No general (`VPATH' variable) search path.
 
 # # of strings in strcache: 1
@@ -272,6 +271,6 @@ teardown:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sat Jun  4 19:33:19 2022
+# Finished Make data base on Mon Jun  6 09:37:25 2022
 
  

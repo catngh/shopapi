@@ -14,7 +14,6 @@ import (
 
 func main() {
 	database.Connect()
-	defer database.Close()
 	fmt.Print(utils.GetEnv("APP_PORT"))
 	log.Fatal(http.ListenAndServe(utils.GetEnv("APP_PORT"), routes.Setup()))
 }

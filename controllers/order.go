@@ -7,7 +7,6 @@ import (
 	"github.com/BerIincat/shopapi/models"
 	"github.com/BerIincat/shopapi/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
 )
 
 func NewOrder(c *gin.Context) {
@@ -18,9 +17,8 @@ func NewOrder(c *gin.Context) {
 	cartId := ""
 	var total float64
 	var products []models.Product
-	var prodIdList []string
 	//products := []models.Product{}
-	cart := [20]models.Cart{} // Need to be dynamic !!!
+	cart := []models.Cart{} // Need to be dynamic !!!
 
 	// Check for user id
 	if !utils.UserIdExist(userId) {
@@ -29,40 +27,30 @@ func NewOrder(c *gin.Context) {
 	}
 
 	// Get items in cart
-	rows, err := db.Queryx("SELECT * FROM cart WHERE userId=?", userId)
-	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
+	//rows, err := db.Queryx("SELECT * FROM cart WHERE userId=?", userId)
+	result := db.Where("userId=?", userId).Find(&cart)
+	if utils.PrintErrIfAny(result.Error, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 
-	// i := 0
-	// for rows.Next() {
-	// 	_ = rows.StructScan(&cart[i])
-	// 	ProdIdList = append(ProdIdList, cart[i].Item)
-	// 	cartId = cart[i].CartID
-	// 	i++
-	// }
-	prodIdList, cartId = getQueryResult(rows, cart)
-
-	// Use item ids in cart to query for full product info => Inefficient
-	for _, ele := range prodIdList {
-		db.Get(&product, "SELECT * FROM product WHERE productId=?", ele)
+	for _, ele := range cart {
+		// Get product by id -> append to product list -> sum into total price
+		db.Where("productId=?", ele.Item).Find(&product)
 		products = append(products, product)
-	}
-
-	// get sub total by summing all product prices
-	for _, ele := range products {
-		price, _ := strconv.ParseFloat(ele.Price, 64)
+		price, _ := strconv.ParseFloat(product.Price, 64)
 		total += price
+		cartId = ele.CartID
 	}
-
 	subTotal := strconv.FormatFloat(total, 'f', -1, 64)
-	res, err := db.Exec("INSERT INTO `order`(cartId, subTotal) VALUES (?,?)", cartId, subTotal)
-	if utils.PrintErrIfAny(err, 400, gin.H{"error": "order error"}, c) {
+	order := models.Order{CartID: cartId, SubTotal: subTotal}
+
+	result = db.Select("CartID", "SubTotal").Create(&order)
+	//res, err := db.Exec("INSERT INTO `order`(cartId, subTotal) VALUES (?,?)", cartId, subTotal)
+	if utils.PrintErrIfAny(result.Error, 400, gin.H{"error": "order error"}, c) {
 		return
 	}
 
-	temp, _ := res.LastInsertId()
-	response.init(string(strconv.FormatInt(temp, 10)), subTotal, products)
+	response = ResponseBody{OrdId: order.CartID, Total: subTotal, Items: products}
 	c.JSON(201, response)
 }
 
@@ -70,23 +58,4 @@ type ResponseBody struct {
 	OrdId string
 	Items []models.Product
 	Total string
-}
-
-func (r *ResponseBody) init(id string, total string, items []models.Product) {
-	r.OrdId = id
-	r.Total = total
-	r.Items = items
-}
-
-func getQueryResult(rows *sqlx.Rows, cart [20]models.Cart) ([]string, string) {
-	var productList []string
-	var cartId string
-	i := 0
-	for rows.Next() {
-		_ = rows.StructScan(&cart[i])
-		productList = append(productList, cart[i].Item)
-		cartId = cart[i].CartID
-		i++
-	}
-	return productList, cartId
 }
