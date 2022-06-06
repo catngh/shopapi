@@ -11,46 +11,37 @@ import (
 
 func NewOrder(c *gin.Context) {
 	userId := c.Param("userid")
-	db := database.DB
 	product := models.Product{}
 	response := ResponseBody{}
-	cartId := ""
-	var total float64
+	cartId, total := "", ""
 	var products []models.Product
-	//products := []models.Product{}
-	cart := []models.Cart{} // Need to be dynamic !!!
+	cart := []models.Cart{}
 
 	// Check for user id
-	if !utils.UserIdExist(userId) {
+	if !database.User().IdExist(userId) {
 		c.JSON(400, gin.H{"error": "user not found"})
 		return
 	}
 
 	// Get items in cart
-	//rows, err := db.Queryx("SELECT * FROM cart WHERE userId=?", userId)
-	result := db.Where("userId=?", userId).Find(&cart)
-	if utils.PrintErrIfAny(result.Error, 500, gin.H{"error": "database error"}, c) {
+	cart, err := database.Cart().GetAllByUserID(userId)
+	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 
 	for _, ele := range cart {
 		// Get product by id -> append to product list -> sum into total price
-		db.Where("productId=?", ele.Item).Find(&product)
+		product, _ = database.Product().GetByID(ele.Item)
 		products = append(products, product)
-		price, _ := strconv.ParseFloat(product.Price, 64)
-		total += price
 		cartId = ele.CartID
 	}
-	subTotal := strconv.FormatFloat(total, 'f', -1, 64)
-	order := models.Order{CartID: cartId, SubTotal: subTotal}
+	total = getTotalPrice(products)
 
-	result = db.Select("CartID", "SubTotal").Create(&order)
-	//res, err := db.Exec("INSERT INTO `order`(cartId, subTotal) VALUES (?,?)", cartId, subTotal)
-	if utils.PrintErrIfAny(result.Error, 400, gin.H{"error": "order error"}, c) {
+	err = database.Order().Create(cartId, total)
+	if utils.PrintErrIfAny(err, 400, gin.H{"error": "order error"}, c) {
 		return
 	}
-
-	response = ResponseBody{OrdId: order.CartID, Total: subTotal, Items: products}
+	response = ResponseBody{OrdId: cartId, Total: total, Items: products}
 	c.JSON(201, response)
 }
 
@@ -58,4 +49,13 @@ type ResponseBody struct {
 	OrdId string
 	Items []models.Product
 	Total string
+}
+
+func getTotalPrice(products []models.Product) string {
+	var sum float64 = 0
+	for _, ele := range products {
+		price, _ := strconv.ParseFloat(ele.Price, 64)
+		sum += price
+	}
+	return strconv.FormatFloat(sum, 'f', -1, 64)
 }

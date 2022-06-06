@@ -9,7 +9,6 @@ import (
 )
 
 func Login(c *gin.Context) {
-	db := database.DB
 	var newUser, queriedUser models.User
 	err := c.BindJSON(&newUser)
 
@@ -20,11 +19,10 @@ func Login(c *gin.Context) {
 	if !utils.ValidateEmailPwd(newUser.Email, newUser.Password, c) {
 		return
 	}
-	result := db.Where("email=?", newUser.Email).First(&queriedUser)
-	//err = db.Get(&queriedUser, "SELECT * FROM usr WHERE email=?", newUser.Email)
-
+	//queriedUser, err = database.User.GetByEmail(newUser.Email)
+	queriedUser, err = database.User().GetByEmail(newUser.Email)
 	// Email not found
-	if utils.PrintErrIfAny(result.Error, 400, gin.H{"error": "email not found"}, c) {
+	if utils.PrintErrIfAny(err, 400, gin.H{"error": "email not found"}, c) {
 		return
 	}
 
@@ -38,7 +36,6 @@ func Login(c *gin.Context) {
 
 }
 func Register(c *gin.Context) {
-	db := database.DB
 	var newUser models.User
 	err := c.BindJSON(&newUser)
 
@@ -50,16 +47,16 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// Preparing query
+	// Hash user password
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(newUser.Password), 8)
 	newUser.Password = string(hashed)
 
 	// Populated newUser struct
-	result := db.Select("Email", "Password", "Role").Create(&newUser)
-	//res, err := db.Exec("INSERT INTO usr (email,password,role) VALUES ('?','?','?')", newUser.Email, newUser.Password, newUser.Role)
+	newUser, err = database.User().Create(newUser)
+
 	// Duplicated entry
-	if result.Error != nil {
-		if result.Error.Error()[6:10] == "1062" {
+	if err != nil {
+		if err.Error()[6:10] == "1062" {
 			c.JSON(400, gin.H{"error": "email existed"})
 		} else {
 			c.JSON(500, gin.H{"error": "database error"})

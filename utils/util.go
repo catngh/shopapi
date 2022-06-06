@@ -1,12 +1,9 @@
 package utils
 
 import (
-	"database/sql"
 	"net/mail"
 	"os"
 
-	"github.com/BerIincat/shopapi/database"
-	"github.com/BerIincat/shopapi/models"
 	"github.com/gin-gonic/gin"
 	"github.com/go-passwd/validator"
 	"github.com/joho/godotenv"
@@ -21,28 +18,6 @@ func GetEnv(key string) string {
 	err := godotenv.Load(".env")
 	CheckError(err)
 	return os.Getenv(key)
-}
-func UserIdExist(uid string) bool {
-	db := database.DB
-	user := models.User{}
-	// q := "SELECT * FROM usr WHERE userId=" + uid
-	// row := db.QueryRow(q)
-	res := db.Where("userId=?", uid).First(&user)
-	if res.Error == sql.ErrNoRows || res.Error != nil {
-		return false
-	}
-	return true
-}
-func ProductIdExist(pid string) bool {
-	db := database.DB
-	product := models.Product{}
-	// q := "SELECT * FROM product WHERE productId=" + pid
-	// row := db.QueryRow(q)
-	res := db.Where("productId=?", pid).First(&product)
-	if res.Error == sql.ErrNoRows || res.Error != nil {
-		return false
-	}
-	return true
 }
 
 func PrintErrIfAny(err error, code int, mess gin.H, c *gin.Context) bool {
