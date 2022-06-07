@@ -9,10 +9,6 @@ import (
 type userControl struct {
 }
 
-func User() *userControl {
-	return &DC.UserContr
-}
-
 func (u userControl) GetByEmail(email string) (models.User, error) {
 	var queriedUser models.User
 	result := DB.Where("email=?", email).First(&queriedUser)

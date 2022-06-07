@@ -9,10 +9,6 @@ import (
 type cartControl struct {
 }
 
-func Cart() *cartControl {
-	return &cartControl{}
-}
-
 func (u cartControl) GetAllByUserID(uid string) ([]models.Cart, error) {
 	cart := []models.Cart{}
 	result := DB.Where("userId=?", uid).Find(&cart)

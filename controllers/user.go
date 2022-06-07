@@ -1,14 +1,13 @@
 package controllers
 
 import (
-	"github.com/BerIincat/shopapi/database"
 	"github.com/BerIincat/shopapi/models"
 	"github.com/BerIincat/shopapi/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Login(c *gin.Context) {
+func (h *Handler) Login(c *gin.Context) {
 	var newUser, queriedUser models.User
 	err := c.BindJSON(&newUser)
 
@@ -20,7 +19,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	//queriedUser, err = database.User.GetByEmail(newUser.Email)
-	queriedUser, err = database.User().GetByEmail(newUser.Email)
+	queriedUser, err = h.db.User.GetByEmail(newUser.Email)
 	// Email not found
 	if utils.PrintErrIfAny(err, 400, gin.H{"error": "email not found"}, c) {
 		return
@@ -35,7 +34,7 @@ func Login(c *gin.Context) {
 	c.JSON(200, gin.H{"userId": queriedUser.UserID, "email": queriedUser.Email, "role": queriedUser.Role})
 
 }
-func Register(c *gin.Context) {
+func (h *Handler) Register(c *gin.Context) {
 	var newUser models.User
 	err := c.BindJSON(&newUser)
 
@@ -52,8 +51,8 @@ func Register(c *gin.Context) {
 	newUser.Password = string(hashed)
 
 	// Populated newUser struct
-	newUser, err = database.User().Create(newUser)
-
+	//newUser, err = h.db.User().Create(newUser)
+	newUser, err = h.db.User.Create(newUser)
 	// Duplicated entry
 	if err != nil {
 		if err.Error()[6:10] == "1062" {

@@ -9,9 +9,6 @@ import (
 type productControl struct {
 }
 
-func Product() *productControl {
-	return &productControl{}
-}
 func (u productControl) GetByID(pid string) (models.Product, error) {
 	product := models.Product{}
 	result := DB.Where("productId=?", pid).First(&product)

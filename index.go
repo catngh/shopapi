@@ -14,8 +14,10 @@ import (
 
 func main() {
 	database.Connect()
-	ins := database.DbControllers{}
-	ins.Init(&ins)
+	//ins := database.DbControllers{}
+	//ins.Init(&ins)
+	dbCon := database.New()
+
 	fmt.Print(utils.GetEnv("APP_PORT"))
-	log.Fatal(http.ListenAndServe(utils.GetEnv("APP_PORT"), routes.Setup()))
+	log.Fatal(http.ListenAndServe(utils.GetEnv("APP_PORT"), routes.Setup(dbCon)))
 }
