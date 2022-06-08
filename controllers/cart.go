@@ -1,33 +1,32 @@
 package controllers
 
 import (
-	"github.com/BerIincat/shopapi/database"
 	"github.com/BerIincat/shopapi/models"
 	"github.com/BerIincat/shopapi/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func GetCart(c *gin.Context) {
+func (h *Handler) GetCart(c *gin.Context) {
 	userId := c.Param("userid")
 	product := models.Product{}
 	var products []models.Product
 	cart := []models.Cart{}
 
 	// Check for user id
-	if !database.User().IdExist(userId) {
+	if !h.db.User.IdExist(userId) {
 		c.JSON(400, gin.H{"error": "user not found"})
 		return
 	}
 
 	// Get items in cart
-	cart, err := database.Cart().GetAllByUserID(userId)
+	cart, err := h.db.Cart.GetAllByUserID(userId)
 
 	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 
 	for _, ele := range cart {
-		product, _ = database.Product().GetByID(ele.Item)
+		product, _ = h.db.Product.GetByID(ele.Item)
 		products = append(products, product)
 	}
 
@@ -35,7 +34,7 @@ func GetCart(c *gin.Context) {
 	c.JSON(200, products)
 	return
 }
-func DelCartItem(c *gin.Context) {
+func (h *Handler) DelCartItem(c *gin.Context) {
 	userId := c.Param("userid")
 	body := ReqBody{} //To parse req body
 	err := c.BindJSON(&body)
@@ -44,12 +43,12 @@ func DelCartItem(c *gin.Context) {
 		return
 	}
 
-	if !validateInput(userId, body.ProdId, c) {
+	if !h.validateInput(userId, body.ProdId, c) {
 		return
 	}
 
 	// Prepare query
-	err = database.Cart().Delete(userId, body.ProdId)
+	err = h.db.Cart.Delete(userId, body.ProdId)
 	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
@@ -57,7 +56,7 @@ func DelCartItem(c *gin.Context) {
 	c.JSON(201, gin.H{"status": "item deleted succesfully"})
 
 }
-func AddCartItem(c *gin.Context) {
+func (h *Handler) AddCartItem(c *gin.Context) {
 	userId := c.Param("userid")
 	body := ReqBody{} //To parse req body
 
@@ -66,12 +65,12 @@ func AddCartItem(c *gin.Context) {
 		return
 	}
 
-	if !validateInput(userId, body.ProdId, c) {
+	if !h.validateInput(userId, body.ProdId, c) {
 		return
 	}
 
 	// Insert new item
-	err = database.Cart().Create(userId, body.ProdId)
+	err = h.db.Cart.Create(userId, body.ProdId)
 
 	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
 		return
@@ -84,15 +83,15 @@ type ReqBody struct {
 	ProdId string `json:"productId"`
 }
 
-func validateInput(userid string, prodid string, c *gin.Context) bool {
+func (h *Handler) validateInput(userid string, prodid string, c *gin.Context) bool {
 	// Check for user id
-	if !database.User().IdExist(userid) {
+	if !h.db.User.IdExist(userid) {
 		c.JSON(400, gin.H{"error": "user not found"})
 		return false
 	}
 
 	// Check for product id
-	if !database.Product().IdExist(prodid) {
+	if !h.db.Product.IdExist(prodid) {
 		c.JSON(400, gin.H{"error": "product not found"})
 		return false
 	}

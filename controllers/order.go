@@ -3,13 +3,12 @@ package controllers
 import (
 	"strconv"
 
-	"github.com/BerIincat/shopapi/database"
 	"github.com/BerIincat/shopapi/models"
 	"github.com/BerIincat/shopapi/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func NewOrder(c *gin.Context) {
+func (h *Handler) NewOrder(c *gin.Context) {
 	userId := c.Param("userid")
 	product := models.Product{}
 	response := ResponseBody{}
@@ -18,26 +17,26 @@ func NewOrder(c *gin.Context) {
 	cart := []models.Cart{}
 
 	// Check for user id
-	if !database.User().IdExist(userId) {
+	if !h.db.User.IdExist(userId) {
 		c.JSON(400, gin.H{"error": "user not found"})
 		return
 	}
 
 	// Get items in cart
-	cart, err := database.Cart().GetAllByUserID(userId)
+	cart, err := h.db.Cart.GetAllByUserID(userId)
 	if utils.PrintErrIfAny(err, 500, gin.H{"error": "database error"}, c) {
 		return
 	}
 
 	for _, ele := range cart {
 		// Get product by id -> append to product list -> sum into total price
-		product, _ = database.Product().GetByID(ele.Item)
+		product, _ = h.db.Product.GetByID(ele.Item)
 		products = append(products, product)
 		cartId = ele.CartID
 	}
 	total = getTotalPrice(products)
 
-	err = database.Order().Create(cartId, total)
+	err = h.db.Order.Create(cartId, total)
 	if utils.PrintErrIfAny(err, 400, gin.H{"error": "order error"}, c) {
 		return
 	}
